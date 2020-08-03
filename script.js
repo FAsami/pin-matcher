@@ -1,64 +1,100 @@
-function getOutput() {
-    return document.getElementById("input-field").value;
-}
-function printOutput(num) {
-    document.getElementById("input-field").value = num;
+//Getting input field value
+function getInputValue() {
+  return document.getElementById("input-field").value;
 }
 
-
-//Getting all buttons by their classname except submit & generate
-var buttons = document.getElementsByClassName("button");
-for (var i = 0; i < buttons.length; i++) {
-    buttons[i].addEventListener('click', function () {
-        var output = getOutput();
-        if (this.id == "clear") {
-            printOutput("");
-        } else if (this.id == "backspace") {
-            var output = output.toString();
-            if (output) {//if output has a value
-                output = output.substr(0, output.length - 1);
-                printOutput(output);
-            }
-        } else {
-            output = output + this.id;
-            printOutput(output);
-        }
-    });
+//Adding input field value to the UI
+function printInputValue(num) {
+  document.getElementById("input-field").value = num;
 }
 
+//Handle all buttons
+function handleButtons() {
+  let inputValue = getInputValue();
+  //Clear button
+  if (this.id == "clear") {
+    printInputValue("");
+    //Backspace button
+  } else if (this.id == "backspace") {
+    let inputValueString = inputValue.toString();
+    if (inputValue) {
+      //if inputValue has a value
+      inputValue = inputValueString.substr(0, inputValueString.length - 1);
+      printInputValue(inputValue);
+    }
+  } else {
+    //Getting buttons value by id
+    inputValue = inputValue + this.id;
+    printInputValue(inputValue);
+  }
+}
+
+//All input buttons
+const buttons = document.getElementsByClassName("button");
+//Looping over all button except submit and generate
+for (let i = 0; i < buttons.length; i++) {
+  buttons[i].addEventListener("click", handleButtons);
+}
 
 //Generating 4 digits random number
 function generateRandomNumber() {
-    var randomNumber = "";
-    for (var i = 0; i < 4; i++) {
-        randomNumber += Math.floor(Math.random() * 10);;
-    }
-    return randomNumber;
+  let randomNumber = "";
+  for (let i = 0; i < 4; i++) {
+    randomNumber += Math.floor(Math.random() * 10);
+  }
+  return randomNumber;
 }
 
-
-//Generate button handler 
-var generateBtn = document.getElementById('generate-button');
-generateBtn.addEventListener('click', function () {
-    var generateInputField = document.getElementById('generate-input-field');
-    generateInputField.value = generateRandomNumber();
+//Generate pin button handler
+const generateBtn = document.getElementById("generate-button");
+generateBtn.addEventListener("click", function () {
+  const generateInputField = document.getElementById("generate-input-field");
+  generateInputField.value = generateRandomNumber();
+  generateInputField.setAttribute("readonly", true);
 });
 
+//Dispaly notification
+function displayNotification(elementIdtoHide, elementIdToShow) {
+  document.getElementById(elementIdToShow).style.display = "block";
+  document.getElementById(elementIdtoHide).style.display = "none";
+}
+//clear input field value
+function clearField(id) {
+  document.getElementById(id).value = "";
+}
+
+//Total trials left
+let trialsLeft = 3;
 
 //Submit button handler
-var submitBtn = document.getElementById('submit-button');
-submitBtn.addEventListener('click', function () {
-    var generateInputValue = document.getElementById('generate-input-field').value;
-    var inputFieldValue = document.getElementById("input-field").value;
-    if (inputFieldValue == generateInputValue && inputFieldValue !== "") {
-        document.getElementById('matched').style.display = "block"
-        document.getElementById('not-matched').style.display = "none"
-        document.getElementById("input-field").value = "";
-        document.getElementById('generate-input-field').value = "";
-    } else if (inputFieldValue !== "" && generateInputValue !== "") {
-        document.getElementById('not-matched').style.display = "block"
-        document.getElementById('matched').style.display = "none"
+const submitBtn = document.getElementById("submit-button");
+submitBtn.addEventListener("click", function () {
+  let generateInputValue = document.getElementById("generate-input-field")
+    .value;
+  let inputFieldValue = document.getElementById("input-field").value;
+
+  if (inputFieldValue == generateInputValue && inputFieldValue !== "") {
+    //if the pin matched
+    displayNotification("not-matched", "matched");
+    clearField("input-field");
+    clearField("generate-input-field");
+  } else if (inputFieldValue !== "" && generateInputValue !== "") {
+    //if the pin don't match
+    if (trialsLeft > 1) {
+      //if any trials left
+      displayNotification("matched", "not-matched");
+      clearField("input-field");
+      clearField("generate-input-field");
+      trialsLeft--;
+      document.getElementById("trials-left").textContent = trialsLeft;
+    } else {
+      //if no trials left
+      document.getElementById("not-matched").style.display = "none";
+      document.getElementById("matched").style.display = "none";
+      document.getElementById("trials-left").textContent = "No more";
+      document.getElementById("trial").style.display = "block";
+      submitBtn.setAttribute("disabled", true);
+      generateBtn.setAttribute("disabled", true);
     }
+  }
 });
-
-
